@@ -18,6 +18,7 @@ from .check import (
     layout_check,
     order_check,
     readability_check,
+    surface_form_check,
     scale_and_ticks_check,
 )
 from .dataset import Dataset
