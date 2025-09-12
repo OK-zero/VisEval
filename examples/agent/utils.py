@@ -10,6 +10,5 @@ def show_svg(plt, svg_name: str):
     plt.savefig(f, format="svg")
     if svg_name:
         plt.savefig(f"{svg_name}")
-    plt.close()
 
     return f.getvalue()

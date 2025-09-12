@@ -1,42 +1,40 @@
-[project]
+
+[tool.poetry]
 name = "vis-evaluator"
 version = "0.0.3"
-requires-python = ">=3.10"
-dependencies = [
-    "langchain",
-    "python-dotenv",
-    "numpy",
-    "pandas",
-    "matplotlib",
-    "seaborn",
-    "CairoSVG",
-    "selenium",
-    "llmx",
-]
+description = "A visual evaluation toolkit."
+authors = ["Your Name <your@email.com>"]
+license = "MIT"
 readme = "README.md"
-license = {text = "MIT"}
-
-[tool.setuptools.packages.find]
-include = ["viseval*"]
-
-[project.urls]
-Documentation = "https://github.com/microsoft/VisEval#readme"
-Issues = "https://github.com/microsoft/VisEval/issues"
-Source = "https://github.com/microsoft/VisEval"
-
-[project.optional-dependencies]
-dev = [
-    "pytest",
-    "flake8",
-    "pre-commit",
-    "black",
-    "isort",
-    "hatch",
-    "mlcopilot",
-    "lida",
+repository = "https://github.com/microsoft/VisEval"
+documentation = "https://github.com/microsoft/VisEval#readme"
+homepage = "https://github.com/microsoft/VisEval"
+packages = [
+    { include = "viseval" }
 ]
 
+[tool.poetry.dependencies]
+python = ">=3.10"
+langchain = "*"
+python-dotenv = "*"
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+seaborn = "*"
+CairoSVG = "*"
+selenium = "*"
+llmx = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+flake8 = "*"
+pre-commit = "*"
+black = "*"
+isort = "*"
+hatch = "*"
+mlcopilot = "*"
+lida = "*"
 
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

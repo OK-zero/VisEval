@@ -3,57 +3,41 @@
 
 import argparse
 from pathlib import Path
+from os import getenv
 
 import dotenv
 from agent import Chat2vis, CoML4VIS, Lida
 
 from viseval import Dataset, Evaluator
+from langchain_openai import ChatOpenAI
 
 dotenv.load_dotenv()
 
 
-def configure_llm(model: str, agent: str):
-    if agent == "lida":
-        if model in ["gpt-35-turbo", "gpt-4"]:
-            from llmx import llm
+model_name_to_id = {
+    "qwen3-4b": "qwen/qwen3-4b:free",
+    "qwen3-8b": "qwen/qwen3-8b:free",
+    "qwen3-14b": "qwen/qwen3-14b:free",
+    "qwen2.5": "qwen2.5-coder-7b-instruct",
+}
 
-            return llm(
-                provider="openai",
-                api_type="azure",
-                model=model,
-                models={
-                    "max_tokens": 4096,
-                    "temperature": 0.0,
-                },
-            )
-        else:
-            raise ValueError(f"Unknown model {model}")
+
+def configure_llm(model: str):
+    if model in model_name_to_id.keys():
+        return ChatOpenAI(
+            model_name=model_name_to_id[model],
+            base_url=getenv("BASE_URL"),
+            max_retries=999,
+            temperature=0.0,
+            request_timeout=20,
+            max_tokens=4096,
+        )
     else:
-        if model == "gemini-pro":
-            from langchain_google_genai import ChatGoogleGenerativeAI
-
-            return ChatGoogleGenerativeAI(
-                model=model, temperature=0.0, convert_system_message_to_human=True
-            )
-        elif model in ["gpt-35-turbo", "gpt-4"]:
-            from langchain_openai import AzureChatOpenAI
-
-            return AzureChatOpenAI(
-                model_name=model,
-                max_retries=999,
-                temperature=0.0,
-                request_timeout=20,
-            )
-        elif model == "codellama-7b":
-            from model.langchain_llama import ChatLlama
-
-            return ChatLlama("../llama_models/CodeLlama-7b-Instruct")
-        else:
-            raise ValueError(f"Unknown model {model}")
+        raise ValueError(f"Unknown model {model}")
 
 
 def config_agent(agent: str, model: str, config: dict):
-    llm = configure_llm(model, agent)
+    llm = configure_llm(model)
     if agent == "coml4vis":
         return CoML4VIS(llm, config)
     elif agent == "chat2vis":
@@ -75,8 +59,8 @@ def _main():
     parser.add_argument(
         "--model",
         type=str,
-        default="gpt-35-turbo",
-        choices=["gpt-4", "gpt-35-turbo", "gemini-pro", "codellama-7b"],
+        default="qwen2.5",
+        choices=["qwen3-4b", "qwen3-8b", "qwen3-14b", "qwen2.5"],
     )
     parser.add_argument(
         "--agent",
@@ -89,7 +73,9 @@ def _main():
         "--library", type=str, default="matplotlib", choices=["matplotlib", "seaborn"]
     )
     parser.add_argument("--logs", type=Path, default="./logs")
-    parser.add_argument("--webdriver", type=Path, default="/usr/bin/chromedriver")
+    parser.add_argument(
+        "--webdriver", type=Path, default="/opt/homebrew/bin/chromedriver"
+    )
 
     args = parser.parse_args()
 
@@ -103,10 +89,9 @@ def _main():
         {"num_examples": args.num_examples, "library": args.library},
     )
 
-    from langchain_openai import AzureChatOpenAI
-
-    vision_model = AzureChatOpenAI(
-        model_name="gpt-4-turbo-v",
+    vision_model = ChatOpenAI(
+        model_name="google/gemma-3-4b-it:free",
+        base_url=getenv("OPENROUTER_BASE_URL"),
         max_retries=999,
         temperature=0.0,
         request_timeout=20,

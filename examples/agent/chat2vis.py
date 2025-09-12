@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+import re
 import sys
 import warnings
 
@@ -14,13 +15,15 @@ from .utils import show_svg
 
 MAXIMUM_SAMPLES = 10
 
-TEMPLATE = '''"""Use a dataframe called df from data_file.csv with columns {columns}.
+TEMPLATE = '''Please provide the comments and preliminary code first. Only with these specific materials can I generate the directly runnable code as required.
+
+"""Use a dataframe called df from data_file.csv with columns {columns}.
 
 {columns_description}
 
 Label the x and y axes appropriately. Add a title. Set the fig suptitle as empty.
 
-Using Python version 3.9.12 and library {library}, create a script using the dataframe df to graph the following: {nl_query}.
+Using Python version 3.9.12 and library {library}, create a script using the dataframe df to graph the following: {nl_query}
 """
 
 {pre_code}
@@ -39,9 +42,9 @@ class Chat2vis(Agent):
             description = None
             if dtype in [int, float, complex]:
                 description = f"The column '{column}' is type {dtype} and contains numeric values."
-            elif dtype == bool:
+            elif dtype is bool:
                 description = f"The column '{column}' is type {dtype} and contains boolean values."
-            elif dtype == object:
+            elif dtype is object:
                 # Check if the string column can be cast to a valid datetime
                 try:
                     with warnings.catch_warnings():
@@ -107,14 +110,35 @@ df=df_nvBenchEval.copy()
             nl_query=nl_query,
             pre_code=pre_code,
         )
+        print(f"\033[32mPrompt:\n{prompt}\033[0m")
 
         try:
             messages = [HumanMessage(content=prompt)]
             response = self.llm.invoke(messages)
             code = response.content
+            # extract code from markdown
+            m = re.search(r"```(?:python)?\n(.*?)```", code, re.DOTALL)
+            if m:
+                code = m.group(1)
             codes = code.split("\n")
             codes = list(filter(lambda row: "data_file.csv" not in row, codes))
             code = "\n".join(codes)
+
+            # remove existing code in pre_code
+            def remove(c):
+                patterns = [
+                    r"^import\s+pandas\s+as\s+pd\s*$",
+                    r"^import\s+matplotlib\.pyplot\s+as\s+plt\s*$",
+                    r"^import\s+seaborn\s+as\s+sns\s*$",
+                    r"^fig\s*,\s*ax\s*=\s*plt\.subplots\s*\(.*\)\s*$",
+                    r"^ax\.spines\[['\"]top['\"]\]\.set_visible\(\s*False\s*\)\s*$",
+                    r"^ax\.spines\[['\"]right['\"]\]\.set_visible\(\s*False\s*\)\s*$",
+                ]
+                return any(re.match(p, c) for p in patterns)
+
+            pre_codes = pre_code.strip().split("\n")
+            pre_codes = list(filter(lambda line: not remove(line), pre_codes))
+            pre_code = "\n".join(pre_codes)
             # plot.show
             if "plt.show()" not in code and ("plt." in code or "fig." in code):
                 code += "\nplt.show()"
@@ -122,6 +146,9 @@ df=df_nvBenchEval.copy()
             context = {
                 "tables": tables,
             }
+            print(
+                f"\033[34mFinal code:\n\033[0m\033[33m{pre_code}\033[0m\n\033[34m{code}\033[0m"
+            )
             return pre_code + "\n" + code, context
         except Exception:
             warnings.warn(str(sys.exc_info()))
@@ -136,7 +163,12 @@ df=df_nvBenchEval.copy()
             "show_svg": show_svg,
             "svg_name": log_name,
         }
-        code += "\nsvg_string = show_svg(plt, svg_name)"
+        # add show_svg before plt.show()
+        code = re.sub(
+            r"plt\.show\s*\(\s*\)",
+            "svg_string = show_svg(plt, svg_name)\nplt.show()",
+            code,
+        )
         try:
             exec(code, global_env)
             svg_string = global_env["svg_string"]

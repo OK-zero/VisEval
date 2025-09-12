@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT license.
 
+import re
 import sys
 import warnings
 
@@ -16,9 +17,15 @@ from .utils import show_svg
 def read_table(name, url, format):
     code = f"{name}_dataset = pd.read_csv('{url}')"
     variable_description = {}
-    exec(code)
+    local_env = {
+        "pd": pd,
+        "describe_variable": describe_variable,
+        "variable_description": variable_description,
+    }
+    exec(code, locals=local_env)
     exec(
-        f"variable_description['{name}_dataset'] = describe_variable({name}_dataset, dataframe_format='{format}', pandas_description_config=dict(max_rows=10))"
+        f"variable_description['{name}_dataset'] = describe_variable({name}_dataset, dataframe_format='{format}', pandas_description_config=dict(max_rows=10))",
+        locals=local_env,
     )
     return code, variable_description
 
@@ -78,7 +85,12 @@ class CoML4VIS(Agent):
         library = context["library"]
 
         global_env = {"svg_string": None, "show_svg": show_svg, "svg_name": log_name}
-        code += "\nsvg_string = show_svg(plt, svg_name)"
+        # add show_svg before plt.show()
+        code = re.sub(
+            r"plt\.show\s*\(\s*\)",
+            "svg_string = show_svg(plt, svg_name)\nplt.show()",
+            code,
+        )
         try:
             exec(code, global_env)
             svg_string = global_env["svg_string"]

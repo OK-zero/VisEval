@@ -184,7 +184,7 @@ class Evaluator:
                     level=logging.INFO,
                     filename=log_folder / "evaluation.log",
                     filemode="a",
-                    format="%(levelname)s: %(message)s",
+                    format="%(asctime)s %(levelname)s: %(message)s",
                 )
                 use_logs = True
             except Exception as e:
@@ -261,7 +261,9 @@ class Evaluator:
 
                     pass_legality = all([result.answer for result in results])
                     if pass_legality:
-                        results += self.readability_evaluate(context, nl_query)
+                        # * don't evaluate readability
+                        # results += self.readability_evaluate(context, nl_query)
+                        pass
 
                 instance_results.append(results)
 
