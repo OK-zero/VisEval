@@ -103,7 +103,9 @@ def _main():
     # evaluate agent
     config = {
         "library": args.library,
-        "logs": f"{args.logs}_{args.agent}_{args.model}_{args.type}_{args.library}",
+        "logs": Path(
+            f"{args.logs}_{args.agent}_{args.model}_{args.type}_{args.library}"
+        ),
     }
     result = evaluator.evaluate(agent, dataset, config)
     score = result.score()
