@@ -105,6 +105,11 @@ def _main():
     result = evaluator.evaluate(agent, dataset, config)
     score = result.score()
     print(f"Score: {score}")
+    # write result to logs
+    args.logs.mkdir(parents=True, exist_ok=True)
+    result.save(
+        args.logs / f"{args.agent}_{args.model}_{args.type}_{args.library}.json"
+    )
 
 
 if __name__ == "__main__":
