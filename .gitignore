@@ -1,5 +1,6 @@
 # Customized
 logs
+logs_*
 .history
 visEval_dataset
 .DS_Store
