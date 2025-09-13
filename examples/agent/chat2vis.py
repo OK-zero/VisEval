@@ -110,7 +110,7 @@ df=df_nvBenchEval.copy()
             nl_query=nl_query,
             pre_code=pre_code,
         )
-        print(f"\033[32mPrompt:\n{prompt}\033[0m")
+        # print(f"\033[32mPrompt:\n{prompt}\033[0m")
 
         try:
             messages = [HumanMessage(content=prompt)]
@@ -139,6 +139,7 @@ df=df_nvBenchEval.copy()
             pre_codes = pre_code.strip().split("\n")
             pre_codes = list(filter(lambda line: not remove(line), pre_codes))
             pre_code = "\n".join(pre_codes)
+            pre_code = "import matplotlib\nmatplotlib.use('Agg')" + pre_code
             # plot.show
             if "plt.show()" not in code and ("plt." in code or "fig." in code):
                 code += "\nplt.show()"
@@ -166,7 +167,7 @@ df=df_nvBenchEval.copy()
         # add show_svg before plt.show()
         code = re.sub(
             r"plt\.show\s*\(\s*\)",
-            "svg_string = show_svg(plt, svg_name)\nplt.show()",
+            "svg_string = show_svg(plt, svg_name)\nplt.close()",
             code,
         )
         try:

@@ -5,6 +5,7 @@ import base64
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Union
 
 import cairosvg
@@ -109,7 +110,6 @@ class EvaluationResult:
                 false_count = len([item for item in evaluate_result if not item])
                 record[dimension[0]] = false_count / count
                 pass_count -= false_count
-                records.append(record)
 
             # pass rate
             record["pass_rate"] = pass_count / count
@@ -135,8 +135,12 @@ class EvaluationResult:
 
         return pd.DataFrame(records)
 
-    def score(self):
+    def score(self, path: Path) -> dict:
         records = self.detail_records()
+        print(records)
+        records.to_json(path / "detail_records.json", orient="records", indent=2)
+        records.to_csv(path / "detail_records.csv", index=False)
+        records.to_html(path / "detail_records.html")
         metrics = [
             "invalid_rate",
             "illegal rate",
@@ -158,6 +162,30 @@ class EvaluationResult:
                 score[key] = records[key].mean()
 
         return score
+
+    def save(self, path: Path) -> None:
+        """Save the evaluation result to a JSON file.
+        Args:
+            path (str or Path): The file path to save the evaluation result.
+        """
+        details_json = [
+            {
+                "id": detail.id,
+                "results": [
+                    [r.get_json() for r in query_results]
+                    for query_results in detail.results
+                ],
+            }
+            for detail in self.details
+        ]
+        score = self.score(path)
+        print(f"\033[92mScore:\n{score}\033[0m")
+        result = {
+            "score": score,
+            "details": details_json,
+        }
+        with open(path / "result.json", "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
 
 
 def convert_svg_to_base64(svg_string):
