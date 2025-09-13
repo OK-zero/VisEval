@@ -52,7 +52,10 @@ def _main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--benchmark", type=Path)
     parser.add_argument(
-        "--type", type=str, choices=["all", "single", "multiple"], default="all"
+        "--type",
+        type=str,
+        choices=["all", "single", "multiple", "sample"],
+        default="all",
     )
     parser.add_argument("--irrelevant_tables", type=bool, default=False)
 
@@ -108,13 +111,9 @@ def _main():
         ),
     }
     result = evaluator.evaluate(agent, dataset, config)
-    score = result.score()
-    print(f"Score: {score}")
+
     # write result to logs
-    args.logs.mkdir(parents=True, exist_ok=True)
-    result.save(
-        args.logs / f"{args.agent}_{args.model}_{args.type}_{args.library}.json"
-    )
+    result.save(config["logs"])
 
 
 if __name__ == "__main__":
