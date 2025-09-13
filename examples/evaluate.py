@@ -101,7 +101,10 @@ def _main():
     evaluator = Evaluator(webdriver_path=args.webdriver, vision_model=vision_model)
 
     # evaluate agent
-    config = {"library": args.library, "logs": args.logs}
+    config = {
+        "library": args.library,
+        "logs": f"{args.logs}_{args.agent}_{args.model}_{args.type}_{args.library}",
+    }
     result = evaluator.evaluate(agent, dataset, config)
     score = result.score()
     print(f"Score: {score}")
