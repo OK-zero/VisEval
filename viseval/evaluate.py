@@ -110,7 +110,6 @@ class EvaluationResult:
                 false_count = len([item for item in evaluate_result if not item])
                 record[dimension[0]] = false_count / count
                 pass_count -= false_count
-                records.append(record)
 
             # pass rate
             record["pass_rate"] = pass_count / count
@@ -138,6 +137,7 @@ class EvaluationResult:
 
     def score(self, path: Path) -> dict:
         records = self.detail_records()
+        print(records)
         records.to_json(path / "detail_records.json", orient="records", indent=2)
         records.to_csv(path / "detail_records.csv", index=False)
         records.to_html(path / "detail_records.html")
