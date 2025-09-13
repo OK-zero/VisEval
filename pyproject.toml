@@ -1,14 +1,13 @@
-
 [tool.poetry]
 name = "vis-evaluator"
 version = "0.0.3"
 description = "A visual evaluation toolkit."
-authors = ["Your Name <your@email.com>"]
+authors = ["okczero <okczero@outlook.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/microsoft/VisEval"
-documentation = "https://github.com/microsoft/VisEval#readme"
-homepage = "https://github.com/microsoft/VisEval"
+repository = "https://github.com/OK-zero/VisEval"
+documentation = "https://github.com/OK-zero/VisEval#readme"
+homepage = "https://github.com/OK-zero/VisEval"
 packages = [
     { include = "viseval" }
 ]
