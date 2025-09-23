@@ -1,9 +1,10 @@
 # Customized
-logs
-logs_*
-.history
-visEval_dataset
+logs/
+logs_*/
+.history/
+visEval_dataset/
 .DS_Store
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
