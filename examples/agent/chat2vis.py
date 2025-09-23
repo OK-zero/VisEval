@@ -40,11 +40,11 @@ class Chat2vis(Agent):
         for column in data.columns:
             dtype = data[column].dtype
             description = None
-            if dtype in [int, float, complex]:
+            if pd.api.types.is_numeric_dtype(dtype):
                 description = f"The column '{column}' is type {dtype} and contains numeric values."
-            elif dtype is bool:
+            elif pd.api.types.is_bool_dtype(dtype):
                 description = f"The column '{column}' is type {dtype} and contains boolean values."
-            elif dtype is object:
+            elif pd.api.types.is_object_dtype(dtype):
                 # Check if the string column can be cast to a valid datetime
                 try:
                     with warnings.catch_warnings():
@@ -57,7 +57,7 @@ class Chat2vis(Agent):
                         dtype = "category"
                     else:
                         dtype = "string"
-            elif pd.api.types.is_categorical_dtype(data[column]):
+            elif isinstance(dtype, pd.CategoricalDtype):
                 dtype = "category"
             elif pd.api.types.is_datetime64_any_dtype(data[column]):
                 dtype = "date"
