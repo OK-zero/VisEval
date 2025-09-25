@@ -93,8 +93,9 @@ def _main():
     )
 
     vision_model = ChatOpenAI(
-        model_name="google/gemma-3-4b-it:free",
-        base_url=getenv("OPENROUTER_BASE_URL"),
+        model_name="gemini-2.0-flash",
+        api_key=getenv("OPENAI_API_KEY_V"),
+        base_url=getenv("BASE_URL_V"),
         max_retries=999,
         temperature=0.0,
         request_timeout=20,

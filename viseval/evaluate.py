@@ -289,9 +289,7 @@ class Evaluator:
 
                     pass_legality = all([result.answer for result in results])
                     if pass_legality:
-                        # * don't evaluate readability
-                        # results += self.readability_evaluate(context, nl_query)
-                        pass
+                        results += self.readability_evaluate(context, nl_query)
 
                 instance_results.append(results)
 
